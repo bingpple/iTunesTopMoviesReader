@@ -17,7 +17,7 @@ sudo gem install cocoapods
 ```Bash
 pod init
 ```
-## 5.Edit PodFile file to pod [FeedKit](https://github.com/nmdias/FeedKit) as below
+## 5.Edit PodFile file to pod [FeedKit](https://github.com/nmdias/FeedKit)
 ```Bash
 # Uncomment the next line to define a global platform for your project
  platform :ios, '11.0'
