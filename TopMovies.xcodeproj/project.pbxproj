@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		371FEAE61F8DAA5300D41D2E /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371FEAE51F8DAA5300D41D2E /* Player.swift */; };
 		3756392F1F89208900912E90 /* TopMovieDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3756392E1F89208900912E90 /* TopMovieDetailViewController.swift */; };
 		37B77D6A1F890AAB0054B17E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B77D691F890AAB0054B17E /* AppDelegate.swift */; };
 		37B77D6C1F890AAB0054B17E /* TopMovieTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B77D6B1F890AAB0054B17E /* TopMovieTableViewController.swift */; };
@@ -36,6 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		371FEAE51F8DAA5300D41D2E /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Player.swift; path = Pods/Player/Sources/Player.swift; sourceTree = SOURCE_ROOT; };
 		3756392E1F89208900912E90 /* TopMovieDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopMovieDetailViewController.swift; sourceTree = "<group>"; };
 		37B77D661F890AAB0054B17E /* TopMovies.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TopMovies.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B77D691F890AAB0054B17E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 		37B77D681F890AAB0054B17E /* TopMovies */ = {
 			isa = PBXGroup;
 			children = (
+				371FEAE51F8DAA5300D41D2E /* Player.swift */,
 				37B77D691F890AAB0054B17E /* AppDelegate.swift */,
 				37B77D6B1F890AAB0054B17E /* TopMovieTableViewController.swift */,
 				3756392E1F89208900912E90 /* TopMovieDetailViewController.swift */,
@@ -363,10 +366,12 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-TopMovies/Pods-TopMovies-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FeedKit/FeedKit.framework",
+				"${BUILT_PRODUCTS_DIR}/Player/Player.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FeedKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Player.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -440,6 +445,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				371FEAE61F8DAA5300D41D2E /* Player.swift in Sources */,
 				3756392F1F89208900912E90 /* TopMovieDetailViewController.swift in Sources */,
 				37B77D6C1F890AAB0054B17E /* TopMovieTableViewController.swift in Sources */,
 				37B77D6A1F890AAB0054B17E /* AppDelegate.swift in Sources */,
