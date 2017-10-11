@@ -1,6 +1,8 @@
 //
 //  TopMovieTableViewController.swift
 //
+//  The MIT License (MIT)
+//
 //  Copyright (c) 2017 Bing Cai
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -102,7 +104,7 @@ class TopMovieTableViewController: UIViewController {
       let topMovieDetailViewController = segue.destination as! TopMovieDetailViewController
       topMovieDetailViewController.movieDetailContent = (feed?.entries?[(tableView.indexPathForSelectedRow?.row)!].content?.value)!
       topMovieDetailViewController.movieName = (feed?.entries?[(tableView.indexPathForSelectedRow?.row)!].title!)!
-      
+      topMovieDetailViewController.movieTrailerAddress = (feed?.entries?[(tableView.indexPathForSelectedRow?.row)!].links![1].attributes?.href)!
     }
     
   }
