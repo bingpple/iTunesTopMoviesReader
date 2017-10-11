@@ -1,5 +1,5 @@
 //
-//  TopMovieTableViewController.swift
+//  TopMovieDetailViewController.swift
 //
 //  The MIT License (MIT)
 //
@@ -25,149 +25,108 @@
 //
 
 import UIKit
-import FeedKit
+import WebKit
+import AVKit
 
-let feedURL = URL(string: "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topMovies/xml")!
 
-class TopMovieTableViewCell: UITableViewCell{
+class TopMovieDetailViewController: UIViewController {
   
-  @IBOutlet weak var movieImageView: UIImageView!
-  @IBOutlet weak var movieNameLabel: UILabel!
-  @IBOutlet weak var moviePriceLabel: UILabel!
-  @IBOutlet weak var movieCategoryLabel: UILabel!
-  
-}
+  var movieDetailContent = ""
+  var movieName = ""
+  var movieTrailerAddress: String = ""
+  fileprivate var player = Player()
 
-class TopMovieTableViewController: UIViewController {
-    
-  var feed: AtomFeed?
-  let parser = FeedParser(URL: feedURL)!
-  var movieDetailContent: String?
-  var movieName: String?
-    
-  @IBOutlet
-  var tableView: UITableView!
-   
-  lazy var refreshControl: UIRefreshControl = {
-    
-    let refreshControl = UIRefreshControl()
-    refreshControl.addTarget(self, action: #selector(TopMovieTableViewController.handleRefresh(_:)), for: UIControlEvents.valueChanged)
-    refreshControl.tintColor = .blue
-    refreshControl.attributedTitle =  NSAttributedString(string: "Refreshing Top Movies List")
-    return refreshControl
-    
-  }()
-    
+  @IBOutlet weak var movieDetailWebView: WKWebView!
+  @IBOutlet weak var movieTrailerContainerView: UIView!
+  
+  // MARK: object lifecycle
+  deinit {
+    self.player.willMove(toParentViewController: self)
+    self.player.view.removeFromSuperview()
+    self.player.removeFromParentViewController()
+  }
+  
   override func viewDidLoad() {
-    
     super.viewDidLoad()
-        
-    if #available(iOS 10.0, *) {
-      tableView.refreshControl = refreshControl
-    } else {
-      tableView.addSubview(refreshControl)
-    }
-        
-    // parse the feed in async way
-    parseFeed()
-    
-  }
-
-  func parseFeed(){
-    
-    parser.parseAsync { [weak self] (result) in
-      self?.feed = result.atomFeed
-            
-    // Then back to the Main thread to update the UI.
-    DispatchQueue.main.async {
-      self?.title = self?.feed?.title
-      self?.tableView.reloadData()
-    }
-      
-    }
-    
-  }
-
-  @objc private func handleRefresh(_ refreshControl: UIRefreshControl) {
-    
-    // Simply retrive the feed again
-    parseFeed()
-        
-    // Refresh the table view
-    tableView.reloadData()
-    refreshControl.endRefreshing()
+    title = movieName
+    movieDetailWebView.loadHTMLString(movieDetailContent, baseURL: nil)
     
   }
   
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    if (segue.identifier == "movieDetailSegue"){
-      let topMovieDetailViewController = segue.destination as! TopMovieDetailViewController
-      topMovieDetailViewController.movieDetailContent = (feed?.entries?[(tableView.indexPathForSelectedRow?.row)!].content?.value)!
-      topMovieDetailViewController.movieName = (feed?.entries?[(tableView.indexPathForSelectedRow?.row)!].title!)!
-      topMovieDetailViewController.movieTrailerAddress = (feed?.entries?[(tableView.indexPathForSelectedRow?.row)!].links![1].attributes?.href)!
-    }
+  @IBAction func playMovieTrailer(_ sender: Any) {
+    self.player.playerDelegate = self
+    self.player.playbackDelegate = self
+    self.player.view.frame = self.movieTrailerContainerView.bounds
+
+    self.player.url = URL(string: movieTrailerAddress)
+    self.player.playbackLoops = false
+    
+    //Single tap to stop and play
+    let tapGestureRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapGestureRecognizer(_:)))
+    tapGestureRecognizer.numberOfTapsRequired = 1
+    self.player.view.addGestureRecognizer(tapGestureRecognizer)
+    self.movieTrailerContainerView.addSubview(self.player.view)
+    self.player.playFromBeginning()
     
   }
   
 }
 
-//MARK: - UITableViewDataSource
-extension TopMovieTableViewController:UITableViewDataSource{
+// MARK: - UIGestureRecognizer
+extension TopMovieDetailViewController {
   
-  func numberOfSections(in tableView: UITableView) -> Int {
-    return 1
-    
-  }
-    
-  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return feed?.entries?.count ?? 0
-    
-  }
-  
-  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "movieCell") as! TopMovieTableViewCell
-    cell.movieCategoryLabel.text = feed?.entries?[indexPath.row].categories?[0].attributes?.label
-    cell.movieNameLabel.text = feed?.entries?[indexPath.row].title
-    let htmlContent = feed?.entries?[indexPath.row].content?.value
-    let pricePat = "\\$ *(\\d+(\\.\\d+)?)"
-    let matchedPrice = matches(for: pricePat, in: htmlContent!)
-    //Match movie price
-    cell.moviePriceLabel.text = matchedPrice[0]
-    let postImgPat = "<img.*?src=\"([^\"]*)\""
-    let matchedImgs = matches(for: postImgPat, in: htmlContent!)
-    //Match movie image element
-    let postImageElement = matchedImgs[0]
-    let postPicPat = "(http[^\\s]+(jpg|jpeg|png|tiff)\\b)"
-    let postPicUrl = matches(for: postPicPat, in: postImageElement)
-    //Match movie image url
-    let imageUrl:URL = URL(string: postPicUrl[0])!
-    DispatchQueue.global(qos: .userInitiated).async {
-      let imageData:NSData = NSData(contentsOf: imageUrl)!
-      // When from background thread, UI needs to be updated on main_queue
-      DispatchQueue.main.async {
-        let image = UIImage(data: imageData as Data)
-          cell.movieImageView.image = image
-        
-      }
-      
+  @objc func handleTapGestureRecognizer(_ gestureRecognizer: UITapGestureRecognizer) {
+    switch (self.player.playbackState.rawValue) {
+    case PlaybackState.stopped.rawValue:
+      self.player.playFromBeginning()
+      break
+    case PlaybackState.paused.rawValue:
+      self.player.playFromCurrentTime()
+      break
+    case PlaybackState.playing.rawValue:
+      self.player.pause()
+      break
+    case PlaybackState.failed.rawValue:
+      self.player.pause()
+      break
+    default:
+      self.player.pause()
+      break
     }
-    
-    return cell
-    
   }
   
- func matches(for regex: String, in text: String) -> [String] {
-    
-    do {
-      let regex = try NSRegularExpression(pattern: regex)
-      let results = regex.matches(in: text,
-                                  range: NSRange(text.startIndex..., in: text))
-      return results.map {String(text[Range($0.range, in: text)!])}
-    } catch let error {
-      print("invalid regex: \(error.localizedDescription)")
-      return []
-    }
-    
+}
+
+// MARK: - PlayerDelegate
+extension TopMovieDetailViewController:PlayerDelegate {
+  
+  func playerReady(_ player: Player) {
+  }
+  
+  func playerPlaybackStateDidChange(_ player: Player) {
+  }
+  
+  func playerBufferingStateDidChange(_ player: Player) {
+  }
+  
+  func playerBufferTimeDidChange(_ bufferTime: Double) {
+  }
+  
+}
+
+// MARK: - PlayerPlaybackDelegate
+extension TopMovieDetailViewController:PlayerPlaybackDelegate {
+  
+  func playerCurrentTimeDidChange(_ player: Player) {
+  }
+  
+  func playerPlaybackWillStartFromBeginning(_ player: Player) {
+  }
+  
+  func playerPlaybackDidEnd(_ player: Player) {
+  }
+  
+  func playerPlaybackWillLoop(_ player: Player) {
   }
   
 }
