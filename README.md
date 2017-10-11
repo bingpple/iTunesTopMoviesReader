@@ -33,7 +33,9 @@ target 'TopMovies' do
 ```Bash
 pod install
 ```
-## 7.Open the XCode workspace to launch the project
+## 7.Copy the [Player.swift](https://github.com/piemonte/Player/tree/master/Sources) into your Xcode project 
+
+## 8.Open the XCode workspace to launch the project
 ```Bash
 open TopMovies.xcworkspace
 ```
